@@ -18,7 +18,7 @@ np.random.seed(seed)
 # noise is: "The proportion of times that a non-bottom finisher finishes non-bottom in the next round,
 # relative to random chance"
 
-df_real = f.get_data()
+df_real = f.get_data_masterchef()
 df_real.season.unique()
 
 
@@ -65,3 +65,8 @@ smf.ols('I(top*1) ~ I(top_previous*1) + I(bottom_previous*1)', data=df_real[df_r
 smf.ols('I(bottom*1) ~ I(top_previous*1) + I(bottom_previous*1)', data=df_real[df_real.top_previous.notnull()]).fit().summary()
 
 
+df_bakeoff = f.get_data_bakeoff()
+df_masterchef = f.get_data_masterchef()
+
+df_bakeoff.shape
+df_bakeoff.head(20)

@@ -61,8 +61,22 @@ episodes_remove = {
   2: ['06', '08', '10', '12', '14', '20']
 }
 
-def get_data_for_season(season):
-  df_raw = pd.read_csv("./data/season2.csv").set_index('Participant')
+
+COLUMN_ORDER = ['season', 'episode', 'agent', 'result']
+
+def get_data_bakeoff_for_season(season):
+  df_raw = pd.read_csv("./data/Great British Bake Off/season%s.csv" % season).set_index('participant')
+  df_long = df_raw.stack(level=-1).reset_index()
+  df_long.columns = ['agent', 'episode', 'result']
+  df_long['season'] = season
+
+  df_long = df_long[df_long.result.notnull()]
+
+  return df_long[COLUMN_ORDER]
+
+  
+def get_data_masterchef_for_season(season):
+  df_raw = pd.read_csv("./data/MasterChef/season%s.csv" % season).set_index('participant')
   df_long = df_raw.stack(level=-1).reset_index()
   df_long.columns = ['agent', 'episode', 'result']
   df_long['season'] = season
@@ -70,18 +84,28 @@ def get_data_for_season(season):
   df_long = df_long[df_long.result.notnull()]
 
   df_long = df_long[~df_long.episode.isin(episodes_remove[season])]
-  return df_long
+  return df_long[COLUMN_ORDER]
 
+SHOW_MASTERCHEF = 1
+SHOW_BAKEOFF = 2
 
-seasons = [1, 2]
+seasons = {
+  SHOW_MASTERCHEF: [1, 2],
+  SHOW_BAKEOFF: [1, 2, 3, 4]
+}
 
-def get_data():
+def get_data_masterchef():
 
-  df = pd.concat([get_data_for_season(season) for season in seasons])
+  df = pd.concat([get_data_masterchef_for_season(season) for season in seasons[SHOW_MASTERCHEF]])
 
   results_top = ['HIGH', 'WIN']
   results_bottom = ['ELIM', 'LOW']
   df['top'] = df.result.isin(results_top)
   df['bottom'] = df.result.isin(results_bottom)
 
+  return df
+
+
+def get_data_bakeoff():
+  df = pd.concat([get_data_bakeoff_for_season(season) for season in seasons[SHOW_MASTERCHEF]])
   return df
