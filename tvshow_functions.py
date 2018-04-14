@@ -2,20 +2,24 @@ import pandas as pd
 import numpy as np
 
 
+# The standard deviation of agent skill. This is a normalization.
+STD_AGENT_SKILL = 1
+
+
 def create_agents(parameters):
   """Returns a series with agent ids and skill"""
-  return pd.Series(np.random.normal(0, parameters['std_agent_skill'], parameters['number']))
+  return pd.Series(np.random.normal(0, STD_AGENT_SKILL, parameters['number']))
 
 
 def simulate_round(parameters, agents):
   """Simulate a round and return the distribution of the result"""
   df = pd.DataFrame(agents, columns=['skill'])
-  std_noise = parameters['std_agent_skill'] * parameters['relative_std_noise']
+  std_noise = STD_AGENT_SKILL * parameters['relative_std_noise']
   df['noise'] = np.random.normal(0, std_noise, len(df))
   df['outcome'] = df.skill + df.noise
   df['rank'] = df.outcome.rank().astype(int)
   number = len(agents)
-  df['top'] = df['rank'].div(number) >= 1- parameters['share_top']
+  df['top'] = df['rank'].div(number) >= 1 - parameters['share_top']
 
   return df
 
@@ -52,18 +56,32 @@ def relative_lift(data):
   return pers_sim[True] / pers_sim[False]
 
 
-def get_data():
-  df_raw = pd.read_csv("./data/season1.csv").set_index('Participant')
+episodes_remove = {
+  1: ['05', '07', '12.1', '12.2', '13'],
+  2: ['06', '08', '10', '12', '14', '20']
+}
+
+def get_data_for_season(season):
+  df_raw = pd.read_csv("./data/season2.csv").set_index('Participant')
   df_long = df_raw.stack(level=-1).reset_index()
   df_long.columns = ['agent', 'episode', 'result']
+  df_long['season'] = season
 
   df_long = df_long[df_long.result.notnull()]
 
-  episodes_remove = ['05', '07', '12.1', '12.2', '13']
-  df_long = df_long[~df_long.episode.isin(episodes_remove)]
-  df_long.episode.unique()
+  df_long = df_long[~df_long.episode.isin(episodes_remove[season])]
+  return df_long
+
+
+seasons = [1, 2]
+
+def get_data():
+
+  df = pd.concat([get_data_for_season(season) for season in seasons])
 
   results_top = ['HIGH', 'WIN']
-  df_long['top'] = df_long.result.isin(results_top)
+  results_bottom = ['ELIM', 'LOW']
+  df['top'] = df.result.isin(results_top)
+  df['bottom'] = df.result.isin(results_bottom)
 
-  return df_long
+  return df

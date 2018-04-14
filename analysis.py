@@ -19,18 +19,21 @@ np.random.seed(seed)
 # relative to random chance"
 
 df_real = f.get_data()
+df_real.season.unique()
 
-share_top = df_real.groupby('episode').top.mean().mean()
 
 rel_lift_data = f.relative_lift(df_real)
 
-number = 10
-std_agent_skill = 1
+# The number of participants and the share that is in the top group
+# is matched to the show data.
+number = df_real.agent.nunique()
+share_top = df_real.groupby('episode').top.mean().mean()
+
+# This is the remaining parameter we are aiming to estimate.
 relative_std_noise = 2
 
 parameters = {
   'number': number,
-  'std_agent_skill': std_agent_skill,
   'relative_std_noise': relative_std_noise,
   'share_top': share_top
 }
@@ -42,4 +45,23 @@ rel_lift_data
 number_runs = 50
 lifts = [f.relative_lift(f.simulate_show(parameters)) for _ in range(number_runs)]
 np.median(lifts)
+
+
+df_real.shape
+
+import statsmodels.formula.api as smf 
+
+df_real = f.get_data()
+df_real['top_previous'] = df_real.groupby('agent').top.shift(1)
+df_real['bottom_previous'] = df_real.groupby('agent').bottom.shift(1)
+
+smf.ols('I(top*1) ~ I(top_previous*1)', data=df_real[df_real.top_previous.notnull()]).fit().summary()
+smf.ols('I(top*1) ~ I(bottom_previous*1)', data=df_real[df_real.bottom_previous.notnull()]).fit().summary()
+
+smf.ols('I(bottom*1) ~ I(bottom_previous*1)', data=df_real[df_real.bottom_previous.notnull()]).fit().summary()
+smf.ols('I(bottom*1) ~ I(top_previous*1)', data=df_real[df_real.top_previous.notnull()]).fit().summary()
+
+smf.ols('I(top*1) ~ I(top_previous*1) + I(bottom_previous*1)', data=df_real[df_real.top_previous.notnull()]).fit().summary()
+smf.ols('I(bottom*1) ~ I(top_previous*1) + I(bottom_previous*1)', data=df_real[df_real.top_previous.notnull()]).fit().summary()
+
 
