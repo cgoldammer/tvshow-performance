@@ -1,6 +1,6 @@
 # Overview
 
-This repo provides data on outcomes for the following reality TV shows:
+This repo provides standardized data on outcomes for the following reality TV shows:
 
 - The Great British Bake Off (All seasons, 1-8)
 - MasterChef (All seasons, 1-8)
@@ -10,10 +10,22 @@ The data provide the outcomes for each contestant and episode in CSV format.
 We also provide python code to clean and combine the data. For instance, you can obtained the cleaned data for MasterChef as follows:
 
 ```
-df_masterchef = f.get_data(f.SHOW_MASTERCHEF)
+>>> df = f.get_data(tvshow_functions.SHOW_MASTERCHEF)
+>>> ## How many results are there?
+>>> df.groupby('season').result.count()
+season
+1    127
+2    236
+3    244
+4    335
+5    320
+6    297
+7    280
+8    360
+Name: result, dtype: int64
 ```
 
-Which results in a DataFrame in which one row describes the outcome for a contestant in a single episode.
+In the resulting data, one row describes the outcome for a contestant in a single episode.
 
 # Data collection
 
