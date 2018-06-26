@@ -169,8 +169,8 @@ downloadOne name cleanedName num = do
 data SeasonData = SeasonData { seasonString :: String }
 
 data ScrapeData = ScrapeData {
-  scrapeName :: String
-, scrapeCleanName :: String
+  scrapeCleanName :: String
+, scrapeName :: String
 , scrapeSeasons :: Map Int SeasonData
 }
 
@@ -212,7 +212,7 @@ parseAll (ScrapeData cleanedName _ seasons) = do
 
 -- Download the html to /data
 downloadAll :: ScrapeData -> IO ()
-downloadAll (ScrapeData name cleanedName seasons) = do
+downloadAll (ScrapeData cleanedName name seasons) = do
   let fullScrapeData = [(name, cleanedName, season) | (season, _) <- toAscList seasons]
   mapM_ (\(name, cleanedName, season) -> downloadOne name cleanedName season) fullScrapeData
 
