@@ -17,6 +17,7 @@ import Data.Text.Lazy.Encoding (decodeUtf8With)
 import qualified Data.Maybe as M
 import Debug.Trace
 
+import Common
 import Scrapers
 
 main :: IO ()
@@ -24,16 +25,27 @@ main = do
   runTestTT allTests
   return ()
 
+
+getCells :: T.Text -> [[Element]]
 getCells = (fmap . fmap) (M.catMaybes . fmap getElement) $ toListOf $ to TL.fromStrict . html . allNamed (only "tr") . children
+
+parse :: TL.Text -> [Node]
+parse = toListOf $ html
+
+getExpandedCells :: T.Text -> [[Element]]
+getExpandedCells text = concat $ (fmap . fmap) expandCellspan $ getCells text
 
 tableExpandShape = [(basicTable, [1]), (spanTable, [2]), (spanTable2, [2])]
 
 tableExpandTest :: B.Markup -> [Int] -> Test
-tableExpandTest markup number = TestCase $ assertEqual (show (toText markup)) ((fmap length . getExpandedCells . toText) markup) number
+tableExpandTest markup number = TestCase $ assertEqual (show (toText markup)) number ((fmap length . getExpandedCells . toText) markup)
 
 tableExpandTests = fmap (uncurry tableExpandTest) tableExpandShape
 
-allTests = TestList ["content tests" ~: contentTests, "table tests" ~: tableExpandTests, "Simplify tests" ~: simpleTests]
+allTests = TestList [
+  "Content tests" ~: contentTests,
+  "Table tests" ~: tableExpandTests,
+  "Simplify tests" ~: simpleTests]
   
 toText :: B.Markup -> T.Text
 toText = TE.decodeUtf8 . BSL.toStrict . renderMarkup
@@ -65,7 +77,7 @@ simpleTest initial expected = TestCase $ assertEqual (show initial ++ " | " ++ s
 
 testContentData = [("<div><p>text1</p><p>text2</p></div>", ["text1", "text2"]), ("<div>text</div>", ["text"])]
 
-testAllContent nodeText expected = TestCase $ error assertEqual expected content
+testAllContent nodeText expected = TestCase $ assertEqual error expected content
   where node = topNode nodeText
         content = allContent node
         error = show (render node) ++ show content
@@ -74,5 +86,4 @@ contentTests = fmap (uncurry testAllContent) testContentData
 
 simpleTests = fmap (uncurry simpleTest) simpleData
 
-parse = toListOf $ html . allNamed (only "tr") . children . to rowParse
 
