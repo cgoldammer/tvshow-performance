@@ -140,11 +140,12 @@ hasData (header:first) = _Success # (header:first)
 -- The number of outcomes for the first contestant must equal
 -- the numer of episodes
 equalLengths :: [OutcomesRow] -> Validation [VError] [OutcomesRow]
-equalLengths (header:first:rest) = if numOutcomes == numEpisodes
-  then _Success # (header:first:rest)
-  else _Failure # [NonEqualLength (numEpisodes, numOutcomes)]
+equalLengths (header:rest) = if maxLength == numEpisodes
+  then _Success # (header:rest)
+  else _Failure # [NonEqualLength (numEpisodes, maxLength)]
   where numEpisodes = length $ outcomesVals header
-        numOutcomes = length $ outcomesVals first
+        numOutcomes = fmap (length . outcomesVals) rest
+        maxLength = maximum numOutcomes
 
 -- Running the outcome rows through the checks
 check :: [OutcomesRow] -> Validated

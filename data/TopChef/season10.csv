@@ -1,22 +1,19 @@
-participant,Original air date
- The chefs were tasked with making a dessert. Because CJ and Tyler were eliminated from the main competition as a team, the two contestants had to work together to create their dish., The chefs were tasked with making a dessert. Because CJ and Tyler were eliminated from the main competition as a team, the two contestants had to work together to create their dish.
-"Eliza vs. CJ vs. Tyler", (
- The chefs had to create a well-composed dish highlighting pickles and carrots., The chefs had to create a well-composed dish highlighting pickles and carrots.
-"Danyele vs. CJ", (
- The chefs were required to make a sandwich using lunch meat., The chefs were required to make a sandwich using lunch meat.
-"Bart vs. CJ", (
- The chefs had to use chicken breast to create a flavorful dish., The chefs had to use chicken breast to create a flavorful dish.
-"John vs. CJ", (
- The chefs were allowed to cook any dish, but were required to use pots and pans bought from a yard sale., The chefs were allowed to cook any dish, but were required to use pots and pans bought from a yard sale.
-"Micah vs. CJ", (
- The chefs had to prepare their best tartare., The chefs had to prepare their best tartare.
-"Kristen vs. CJ", (
- The chefs got to choose an ingredient, a cuisine, and a cooking technique that they had to incorporate into their dishes, as well as a time limit. They decided that they had to prepare a French-inspired snapper dish with a smoked element in 30 minutes., The chefs got to choose an ingredient, a cuisine, and a cooking technique that they had to incorporate into their dishes, as well as a time limit. They decided that they had to prepare a French-inspired snapper dish with a smoked element in 30 minutes.
-"Josie vs. Kristen", (
- The chefs had to break down a salmon, portion 10 identical pieces, and create well-composed dishes for Tom and the eliminated contestants., The chefs had to break down a salmon, portion 10 identical pieces, and create well-composed dishes for Tom and the eliminated contestants.
-"Stefan vs. Kristen", (
- The chefs cooked dishes using , The chefs cooked dishes using 
-"Lizzie vs. Kristen", (
- The chefs made a dish over a campfire using Alaskan fish., The chefs made a dish over a campfire using Alaskan fish.
-"Josh vs. Lizzie vs. Kristen", (
- The chefs received the simple challenge of creating a great plate of food., The chefs received the simple challenge of creating a great plate of food.
+participant,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17
+Kristen,IN,IN,WIN,IN,HIGH,WIN,IN,WIN,WIN,OUT,IN,WINNER,,,,
+Brooke,LOW,IN,IN,LOW,WIN,HIGH,WIN,HIGH,IN,IN,LOW,WIN,WIN,WIN,IN,RUNNER-UP
+Sheldon,HIGH,LOW,IN,IN,HIGH,HIGH,LOW,IN,WIN,WIN,HIGH,LOW,LOW,LOW,OUT,
+Josh,IN,IN,LOW,LOW,LOW,HIGH,LOW,HIGH,HIGH,HIGH,WIN,HIGH,LOW,OUT,,
+Lizzie,IN,HIGH,HIGH,IN,IN,HIGH,HIGH,LOW,LOW,IN,HIGH,HIGH,OUT,,,
+Stefan,LOW,IN,HIGH,LOW,IN,HIGH,IN,IN,IN,IN,LOW,OUT,,,,
+Josie,LOW,LOW,IN,IN,IN,LOW,LOW,IN,LOW,LOW,OUT,,,,,
+Micah,IN,IN,IN,IN,LOW,LOW,HIGH,IN,OUT,,,,,,,
+John,HIGH,IN,IN,LOW,HIGH,LOW,WIN,OUT,,,,,,,,
+Bart,LOW,IN,IN,IN,IN,LOW,OUT,,,,,,,,,
+Danyele,IN,IN,IN,IN,LOW,OUT,,,,,,,,,,
+Eliza,IN,IN,IN,IN,OUT,,,,,,,,,,,
+CJ,LOW,HIGH,LOW,OUT,,,,,,,,,,,,
+IN,LOW,HIGH,OUT,,,,,,,,,,,,,
+Carla,IN,WIN,OUT,,,,,,,,,,,,,
+Chrissy,IN,IN,OUT,,,,,,,,,,,,,
+Kuniko,WIN,OUT,,,,,,,,,,,,,,
+Jeffrey,OUT,,,,,,,,,,,,,,,

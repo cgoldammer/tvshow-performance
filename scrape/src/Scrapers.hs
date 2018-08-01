@@ -28,7 +28,7 @@ getFile name = fmap decodeUtf8 $ BSL.readFile $ name
 getData :: String -> Int -> IO TL.Text
 getData name num = getFile $ "../data/downloaded/" ++ name ++ "_" ++ show num ++ ".html"
 
-season = 1
+season = 10
 textHK = unsafePerformIO $ getData "HellsKitchen" season
 textTC = unsafePerformIO $ getData "TopChef" season
 -- getter = fromJust $ (seasonGetter $ parseSeason scrapeDataHK) season
@@ -64,7 +64,7 @@ padValues num def vals
   | otherwise = vals ++ take (num - length vals) (repeat def)
 
 toCSVData :: [Episode] -> [OutcomesRow] -> T.Text
-toCSVData episodes outcomes = traceShow expandedOutcomes $ T.intercalate newLine $ fmap commaFold (withName : expandedOutcomes)
+toCSVData episodes outcomes = T.intercalate newLine $ fmap commaFold (withName : expandedOutcomes)
   where comma = T.pack ","
         withName = (T.pack "participant") : episodes
         commaFold = T.intercalate comma
