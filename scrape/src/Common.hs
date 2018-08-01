@@ -12,22 +12,29 @@ import qualified Data.Text.Lazy as TL
 import Control.Lens ((#), Prism, Prism', prism, folded, to, only,(^.), (^?),ix, toListOf, (^..))
 import Text.Taggy (Node(..), Element(..), eltChildren)
 import Text.Taggy.Lens (allAttributed, html, element, elements, children, contents, content, allNamed, named, name)
+import Data.List (transpose)
 
 
 -- Expands any table cell with cellspan=x into x nodes, each with the same 
 -- content as the initial cell. All other cells and nodes are unaffected.
-expandCellspan :: Element -> [Element]
-expandCellspan el = take number $ repeat el
-  where number = maybe 1 id $ getColSpan el
+expandSpan :: (Element -> Maybe Int) -> Element -> [Element]
+expandSpan expander el = take number $ repeat el
+  where number = maybe 1 id $ expander el
+
+expandColSpan = expandSpan getColSpan
+expandRowSpan = expandSpan getRowSpan
 
 -- Expand the cellspan, but applied to a node
 expandNode :: Node -> [Node]
 expandNode (NodeContent c) = [NodeContent c]
-expandNode (NodeElement el) = fmap NodeElement $ expandCellspan el
+expandNode (NodeElement el) = fmap NodeElement $ expandColSpan el
 
 -- Obtain the colspan of an Element
-getColSpan :: Element -> Maybe Int
-getColSpan el = join $ fmap (readMaybe . T.unpack) $ HM.lookup (T.pack "colspan") (eltAttrs el)
+getSpan :: String -> Element -> Maybe Int
+getSpan name el = join $ fmap (readMaybe . T.unpack) $ HM.lookup (T.pack name) (eltAttrs el)
+
+getColSpan = getSpan "colspan"
+getRowSpan = getSpan "rowspan"
 
 -- Obtain the colspan of a node
 getNodeSpan :: Node -> Maybe Int
@@ -63,6 +70,11 @@ makeOutcome (Just (OutcomeData Nothing _)) = Nothing
 makeOutcome (Just (OutcomeData (Just contestant) outcomes)) = Just $ OutcomesRow contestant outcomes
 
 
+cleanText :: T.Text -> T.Text
+cleanText text = T.pack $ filter (\c -> c `notElem` unwanted) s
+  where s = T.unpack text
+        unwanted = ['\n']
+
 data OutcomeData = OutcomeData (Maybe T.Text) [T.Text] deriving Show
 
 -- This is the main business logic to parse a row into `OutcomeData`.
@@ -77,7 +89,8 @@ rowParse startCol row = do
   let contestant = firstContent contestantCol
   restCols :: [Node] <- mapM (\num -> expanded ^? ix num) [(startCol+1)..(total - 1)]
   let rest = catMaybes $ fmap firstContent restCols
-  return $ OutcomeData contestant rest
+
+  return $ OutcomeData (fmap cleanText contestant) (fmap cleanText rest)
 
 type HtmlTable = [Node]
 type TableGetter = TL.Text -> Maybe HtmlTable
@@ -141,4 +154,34 @@ check outcomes@(header:rest) = pure (FullData episodes rest) <*
                                equalLengths outcomes <*
                                hasData outcomes
   where episodes = outcomesVals header
+
+type RowSpans = [(Element, Int)]
+type TableRow = [Element]
+withRowSpan :: Element -> (Element, Maybe Int)
+withRowSpan el = (el, getRowSpan el)
+
+simplifySpan :: (Element, Maybe Int) -> (Element, Int)
+simplifySpan (el, Nothing) = (el, 1)
+simplifySpan (el, Just n) = (el, n)
+
+splitByRowSpan :: TableRow -> (RowSpans, TableRow)
+splitByRowSpan row = (fmap simplifySpan withSpan, fmap fst withoutSpan)
+  where rowWithSpans = fmap withRowSpan row
+        (withSpan, withoutSpan) = span (isJust . snd) rowWithSpans
+
+expandRowSpans :: RowSpans -> [[Element]]
+expandRowSpans spans = fmap expandRowSpan cells
+  where cells = fmap fst spans
+
+expandRow :: [[Element]] -> [[Element]]
+expandRow [] = []
+expandRow (firstRow:rest) = [spans ++ rests | (spans, rests) <- zipped]
+  where zipped = zip expandedRowSpans (firstRest : rest)
+        (rowSpans, firstRest) = splitByRowSpan firstRow
+        expandedRowSpans = transpose $ expandRowSpans rowSpans
+
+selectRows :: Int -> Int -> [[a]] -> [[a]]
+selectRows rowHeader rowContent vals = catMaybes $ headerRow : contentRows
+  where headerRow = safeIndex rowHeader vals
+        contentRows = fmap Just $ drop rowContent vals
 

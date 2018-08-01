@@ -5,6 +5,5 @@ module Lib where
 import Scrapers
 
 lib :: IO ()
-lib = do
-  mapM_ doAll scrapeData
+lib = mapM_ doAll scrapeData
   
