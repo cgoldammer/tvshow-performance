@@ -28,7 +28,7 @@ getFile name = fmap decodeUtf8 $ BSL.readFile $ name
 getData :: String -> Int -> IO TL.Text
 getData name num = getFile $ "../data/downloaded/" ++ name ++ "_" ++ show num ++ ".html"
 
-season = 10
+season = 5
 textHK = unsafePerformIO $ getData "HellsKitchen" season
 textTC = unsafePerformIO $ getData "TopChef" season
 -- getter = fromJust $ (seasonGetter $ parseSeason scrapeDataHK) season
@@ -40,14 +40,18 @@ parsedTC = seasonParser (parseSeason scrapeDataTC) season tableTC
 
 scrapeData = [scrapeDataTC]
 
-summ (Just (Success _)) = True
-summ _ = False
+summ (Just (Success _)) = "Success!"
+summ x = show x
 
 parseOne :: String -> ParseSeason -> Int -> IO ()
 parseOne cleanName parseSeason season = do
   text <- getData cleanName season
   let validated = parseOne' cleanName parseSeason season text
-  print $ cleanName ++ ", Season " ++ show season ++ " | " ++ show (summ validated)
+  print $ cleanName ++ ", Season " ++ show season ++ " | " ++ summ validated
+  -- if season == 2 then do
+  --   print $ validated
+  -- else do
+  --   return ()
   maybe (return ()) (exportCSV cleanName season) validated
 
 parseOne' :: String -> ParseSeason -> Int -> TL.Text -> Maybe Validated

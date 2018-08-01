@@ -10,10 +10,10 @@ import Data.Maybe (catMaybes, isJust, listToMaybe)
 import Control.Monad (join)
 import Data.Map (Map, fromList, assocs, toAscList, findWithDefault, lookup)
 
-import Common (TableParser, TableGetter, Validated, check, makeOutcome, rowParse, getNodeSpan, safeIndex, getElement, getTable, ParseSeason(..), DownloadData(..), ScrapeData(..), selectRows)
+import Common (TableParser, TableGetter, Validated, check, makeOutcome, rowParse, getNodeSpan, safeIndex, getElement, getTable, ParseSeason(..), DownloadData(..), ScrapeData(..), selectRows, equalizeLengths)
 
 parseTableTC :: TableParser
-parseTableTC tableRows = check $ catMaybes $ fmap (makeOutcome . rowParse colSpan) nodesSelected
+parseTableTC tableRows = check $ equalizeLengths $ catMaybes $ fmap (makeOutcome . rowParse colSpan) nodesSelected
   where 
         nodesSelected = selectRows 0 4 nodes
         chefNode = join $ safeIndex 1 <$> safeIndex 1 nodesSelected

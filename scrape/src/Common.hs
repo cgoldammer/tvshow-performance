@@ -13,6 +13,7 @@ import Control.Lens ((#), Prism, Prism', prism, folded, to, only,(^.), (^?),ix, 
 import Text.Taggy (Node(..), Element(..), eltChildren)
 import Text.Taggy.Lens (allAttributed, html, element, elements, children, contents, content, allNamed, named, name)
 import Data.List (transpose)
+import Debug.Trace (traceShow)
 
 
 -- Expands any table cell with cellspan=x into x nodes, each with the same 
@@ -64,6 +65,9 @@ simplifyNode node@(NodeElement (Element name attrs children)) = NodeElement $ El
 firstContent :: Node -> Maybe T.Text
 firstContent = listToMaybe . allContent
 
+firstContentDefault :: Node -> T.Text
+firstContentDefault node = maybe "" id $ firstContent node
+
 makeOutcome :: Maybe OutcomeData -> Maybe OutcomesRow
 makeOutcome Nothing = Nothing
 makeOutcome (Just (OutcomeData Nothing _)) = Nothing
@@ -88,7 +92,7 @@ rowParse startCol row = do
   contestantCol :: Node <- expanded ^? ix startCol
   let contestant = firstContent contestantCol
   restCols :: [Node] <- mapM (\num -> expanded ^? ix num) [(startCol+1)..(total - 1)]
-  let rest = catMaybes $ fmap firstContent restCols
+  let rest = fmap firstContentDefault restCols
 
   return $ OutcomeData (fmap cleanText contestant) (fmap cleanText rest)
 
@@ -137,6 +141,19 @@ hasData [] = _Failure # [NoPlayerData]
 hasData (header:[]) = _Failure # [NoPlayerData]
 hasData (header:first) = _Success # (header:first)
 
+takeVals :: Int -> OutcomesRow -> OutcomesRow
+takeVals num (OutcomesRow name vals) = OutcomesRow name $ take num vals
+
+-- Unfortunately, there are tables in which the colspans add up to more than the
+-- number of episodes. This displays sensibly in the browser, because browsers are extremely
+-- forgiving, but it's not correct data. In this case, drop everything after the number of
+-- episodes is reached.
+equalizeLengths :: [OutcomesRow] -> [OutcomesRow]
+equalizeLengths [] = []
+equalizeLengths (header:rest) = header:(fmap (takeVals numOutcomes) rest)
+  where numOutcomes = length $ outcomesVals header
+
+
 -- The number of outcomes for the first contestant must equal
 -- the numer of episodes
 equalLengths :: [OutcomesRow] -> Validation [VError] [OutcomesRow]
@@ -146,6 +163,7 @@ equalLengths (header:rest) = if maxLength == numEpisodes
   where numEpisodes = length $ outcomesVals header
         numOutcomes = fmap (length . outcomesVals) rest
         maxLength = maximum numOutcomes
+
 
 -- Running the outcome rows through the checks
 check :: [OutcomesRow] -> Validated
