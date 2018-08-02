@@ -9,6 +9,8 @@ import Data.Validation (Validation(Failure, Success), _Failure, _Success)
 import qualified Data.HashMap.Strict as HM 
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
+import Data.Map (Map, fromList)
+import Data.Tuple (swap)
 import Control.Lens ((#), Prism, Prism', prism, folded, to, only,(^.), (^?),ix, toListOf, (^..))
 import Text.Taggy (Node(..), Element(..), eltChildren)
 import Text.Taggy.Lens (allAttributed, html, element, elements, children, contents, content, allNamed, named, name)
@@ -204,3 +206,5 @@ selectRows rowHeader rowContent vals = catMaybes $ headerRow : contentRows
   where headerRow = safeIndex rowHeader vals
         contentRows = fmap Just $ drop rowContent vals
 
+constMap :: [Int] -> String -> Map Int String
+constMap seasons name = fromList $ fmap swap $ fmap ((,) name) seasons

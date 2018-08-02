@@ -10,7 +10,7 @@ import Data.Maybe (catMaybes, isJust, listToMaybe)
 import Control.Monad (join)
 import Data.Map (Map, fromList, assocs, toAscList, findWithDefault, lookup)
 
-import Common (TableParser, TableGetter, Validated, check, makeOutcome, rowParse, getNodeSpan, safeIndex, getElement, getTable, ParseSeason(..), DownloadData(..), ScrapeData(..), equalizeLengths)
+import Common (TableParser, TableGetter, Validated, check, makeOutcome, rowParse, getNodeSpan, safeIndex, getElement, getTable, ParseSeason(..), DownloadData(..), ScrapeData(..), equalizeLengths, constMap)
 
 parseTable :: TableParser
 parseTable tableRows = check $ equalizeLengths $ catMaybes $ fmap (makeOutcome . rowParse colSpan) nodes
@@ -29,3 +29,11 @@ parse = ParseSeason getterForSeason (const parseTable)
 download = DownloadData "wiki/Hell%27s_Kitchen_(U.S._season_" "HellsKitchen"
 scrapeDataHK = ScrapeData download parse [1..17]
 
+seasonsFNS = [1..14]
+getterForSeasonFNS :: Int -> Maybe TableGetter
+
+getterForSeasonFNS season = fmap getTable $ lookup season $ constMap seasonsFNS "wikitable"
+parseFNS = ParseSeason getterForSeasonFNS (const parseTable)
+
+downloadFNS = DownloadData "wiki/Food_Network_Star_(season_" "FoodNetworkStar"
+scrapeDataFNS = ScrapeData downloadFNS parseFNS seasonsFNS

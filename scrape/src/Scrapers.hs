@@ -7,6 +7,7 @@ import qualified Data.Text.Lazy as TL
 import Data.Text.Lazy.Encoding (decodeUtf8With, decodeUtf8)
 import Data.ByteString.Lazy as BSL (readFile, ByteString, toStrict)
 
+import Data.Tuple (swap)
 import Text.Read (readMaybe)
 import Data.Maybe (catMaybes, isJust, listToMaybe, fromJust)
 import Control.Monad (join)
@@ -18,7 +19,7 @@ import Data.Validation (Validation(Failure, Success), _Failure, _Success)
 import System.IO.Unsafe (unsafePerformIO)
 
 import Common (ParseSeason(..), ScrapeData(..), DownloadData(..), Validated, HtmlTable, FullData(..), Episode, OutcomesRow(..), getTable)
-import HellsKitchen (scrapeDataHK)
+import HellsKitchen (scrapeDataHK, scrapeDataFNS)
 import TopChef (scrapeDataTC)
 
 
@@ -38,7 +39,7 @@ tableHK = fromJust $ getTable "wikitable" textHK
 parsedHK = seasonParser (parseSeason scrapeDataHK) season tableHK
 parsedTC = seasonParser (parseSeason scrapeDataTC) season tableTC
 
-scrapeData = [scrapeDataTC]
+scrapeData = [scrapeDataHK, scrapeDataTC, scrapeDataFNS]
 
 summ (Just (Success _)) = "Success!"
 summ x = show x
