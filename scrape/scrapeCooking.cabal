@@ -33,6 +33,7 @@ library
                      , validation
                      , curl
                      , turtle
+                     , MissingH
   default-language:    Haskell2010
 
 test-suite scrape-test

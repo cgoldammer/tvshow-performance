@@ -103,6 +103,60 @@ type TableGetter = TL.Text -> Maybe HtmlTable
 type TableParser = HtmlTable -> Validated
 
 
+outcomeVals :: [T.Text]
+outcomeVals = ["OUT", "ELIM"]
+
+personVals :: [T.Text]
+personVals = ["Hometown"]
+
+containsValue :: [T.Text] -> [T.Text] -> Bool
+containsValue content expected = any (\v -> elem v content) expected
+
+tableType :: HtmlTable -> Maybe (Table HtmlTable)
+tableType table
+  | containsAgeTown = Just $ PersonTable table
+  | containsOutcomes = Just $ OutcomeTable table
+  | otherwise = Nothing
+  where containsAgeTown = containsValue allC personVals
+        containsOutcomes = containsValue allC outcomeVals
+        allC = fmap cleanText $ allContents table
+
+allContents :: HtmlTable -> [T.Text]
+allContents nodes = concat . concat $ (fmap . fmap) allContent $ allNodes nodes
+
+data FullExportData = FullExportData {
+  fullName :: String
+, fullSeason :: Int
+, fullValidatedTables :: [Table Validated]
+}
+
+data AllTableParser = AllTableParser {
+  tbPersonParser :: TableParser
+, tbOutcomeParser :: TableParser
+}
+
+data Table a = PersonTable a | OutcomeTable a deriving (Eq, Show)
+
+allNodes :: HtmlTable -> [[Node]]
+allNodes table = fmap eltChildren $ catMaybes $ fmap getElement table
+
+allTables :: TL.Text -> [Table HtmlTable]
+allTables text = catMaybes $ fmap (tableType . eltChildren) $ catMaybes $ fmap getElement $ catMaybes $ fmap ((safeIndex 0) . eltChildren) $ getTables text
+-- catMaybes $ fmap (tableType . eltChildren . catMaybes . (safeIndex 0 ) . eltChildren) $ getTables text
+
+-- x :: _
+-- x text = fmap eltChildren $ catMaybes $ fmap getElement $ catMaybes $ fmap ((safeIndex 0) . eltChildren) $ getTables text
+
+parseTable :: AllTableParser -> Table HtmlTable -> Table Validated
+parseTable (AllTableParser defaultParser _) (PersonTable t) = PersonTable $ defaultParser t
+parseTable (AllTableParser _ parser) (OutcomeTable t) = OutcomeTable $ parser t
+
+getHtmlTables :: Element -> HtmlTable
+getHtmlTables = eltChildren 
+
+getTables :: TL.Text -> [Element]
+getTables text = (toListOf $ html . allNamed (only "table")) text
+
 getTable :: String -> TableGetter
 getTable tableName text = fmap eltChildren $ join $ fmap getElement $ join $ fmap (safeIndex 0 . eltChildren) $ listToMaybe $ (toListOf $ html . allAttributed (folded . only (T.pack tableName))) text
 
@@ -111,14 +165,9 @@ safeIndex num l = l ^? ix num
 
 data DownloadData = DownloadData { downloadUrlPart :: String, downloadCleanName :: String }
 
-data ParseSeason = ParseSeason { 
-  seasonGetter :: Int -> Maybe TableGetter
-, seasonParser :: Int -> TableParser
-}
-
 data ScrapeData = ScrapeData {
   downloadData :: DownloadData
-, parseSeason :: ParseSeason
+, seasonParser :: Int -> AllTableParser
 , scrapeSeasons :: [Int]
 }
 

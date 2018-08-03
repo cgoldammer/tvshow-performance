@@ -1,0 +1,12 @@
+"participant","2","3","4","5","6","7","8","9"
+"None","Aaron","Adam","Kelsey","Shane","None","None","None","None"
+"WIN","WIN","HIGH","LOW","LOW","HIGH","HIGH","IN","WINNER"
+"IN","LOW","HIGH","LOW","LOW","HIGH","LOW","IN","RUNNER-UP"
+"LOW","WIN","WIN","HIGH","IN","LOW","LOW","IN","RUNNER-UP"
+"WIN","HIGH","LOW","WIN","WIN","LOW","OUT",,"FAN FAVORITE"
+"LOW","IN","IN","HIGH","WIN","OUT",,,
+"IN","IN","LOW","LOW","OUT",,,,
+"LOW","LOW","LOW","OUT",,,,,
+"HIGH","LOW","OUT",,,,,,
+"IN","OUT",,,,,,,
+"OUT",,,,,,,,
