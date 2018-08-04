@@ -1,4 +1,13 @@
-"participant","2","3","4","5","6"
-"IN","IN","IN","IN","IN","OUT"
-"IN","OUT",,,,
-"OUT",,,,,
+"participant","1","2","3","4","5","6","7","8","9","10","11"
+"Lenny","HIGH","HIGH","LOW","LOW","HIGH","IN","HIGH","LOW","HIGH","IN","WINNER"
+"Luca","IN","OUT",,,,,"IN","WIN","HIGH","IN","RUNNER-UP"
+"Nicole","HIGH","IN","IN","WIN","IN","LOW","IN","WIN","LOW","IN","RUNNER-UP"
+"Sarah","LOW","IN","IN","IN","IN","IN","LOW","WIN","LOW","OUT",
+"Loreal","HIGH","IN","LOW","IN","HIGH","HIGH","IN","LOW","OUT",,
+"Emma","LOW","IN","WIN","WIN","IN","LOW","LOW","OUT",,,
+"Chris","IN","LOW","LOW","IN","IN","HIGH","OUT",,,,
+"Reuben","IN","IN","IN","WIN","LOW","OUT",,,,,
+"Christopher","IN","IN","WIN","LOW","OUT",,,,,,
+"Aryen","IN","IN","IN","OUT",,,,,,,
+"Kenny","IN","LOW","OUT",,,,,,,,
+"Donna","OUT",,,,,,,,,,

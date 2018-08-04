@@ -1,7 +1,15 @@
-"participant","Week","Week","Week"
-"2","3","4",
-"IN","IN","IN","OUT"
-"IN","IN","IN","OUT"
-"IN","OUT",,
-"OUT",,,
-"OUT",,,
+"participant","Week","Week","Week","Week","Week","Week","Week","Week","Week"
+"1","2","3","4","5","6","7","8","9",
+"Mentor ","N/A","Adam","N/A","Jess","Amy","Manny","Amy","Jess",
+"Christian","IN","HIGH","HIGH","HIGH","LOW","HIGH","HIGH","LOW",
+"Jess","HIGH","HIGH","LOW","HIGH","OUT",,,"IN",
+"Manny","IN","LOW","HIGH","HIGH","HIGH","LOW","HIGH","IN",
+"Amy","HIGH","LOW","LOW","LOW","LOW","HIGH","LOW","OUT",
+"Palak","HIGH","HIGH","IN","LOW","HIGH","LOW","OUT",,
+"Katie","HIGH","HIGH","IN","HIGH","HIGH","OUT",,,
+"Adam","IN","HIGH","IN","OUT",,,,,
+"Harrison","HIGH","IN","HIGH","OUT",,,,,
+"Rebekah","LOW","IN","OUT",,,,,,
+"Samone","HIGH","OUT",,,,,,,
+"Jason","OUT",,,,,,,,
+"Chris","OUT",,,,,,,,

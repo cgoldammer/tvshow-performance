@@ -1,7 +1,16 @@
-"participant","Week","Week","Week","Week","Week"
-"2","3","4","5","6",
-"IN","IN","IN","OUT",,
-"IN","IN","OUT",,,
-"IN","OUT",,,,
-"OUT",,,,,
-"OUT",,,,,
+"participant","Week","Week","Week","Week","Week","Week","Week","Week","Week","Week","Week"
+"1","2","3","4","5","6","7","8","9","10","11",
+"Mentor ","N/A","N/A","N/A","N/A","Matthew","Amy","Jason","Amy","Matthew","Cory","N/A"
+"Jason","HIGH","IN","HIGH","HIGH","HIGH","HIGH","HIGH","HIGH","IN","IN","WINNER"
+"Rusty","IN","IN","IN","LOW","HIGH","HIGH","HIGH","HIGH","LOW","LOW","RUNNER-UP"
+"Cory","IN","HIGH","IN","IN","IN","LOW","IN","OUT",,"IN","RUNNER-UP"
+"Matthew","IN","LOW","IN","IN","HIGH","LOW","HIGH","HIGH","IN","OUT",
+"Amy","HIGH","HIGH","HIGH","IN","HIGH","LOW","LOW","LOW","OUT",,
+"David","IN","IN","HIGH","HIGH","LOW","LOW","OUT",,,,
+"Addie","IN","HIGH","IN","LOW","IN","OUT",,,,,
+"Caodan","HIGH","LOW","LOW","HIGH","OUT",,,,,,
+"Trace","IN","HIGH","LOW","OUT",,,,,,,
+"Suzanne","IN","IN","OUT",,,,,,,,
+"Toya","LOW","OUT",,,,,,,,,
+"Nancy","LOW","OUT",,,,,,,,,
+"Blake","OUT",,,,,,,,,,
