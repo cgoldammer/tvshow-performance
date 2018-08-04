@@ -48,6 +48,10 @@ getElement :: Node -> Maybe Element
 getElement (NodeElement e) = Just e
 getElement (NodeContent _) = Nothing
 
+getContent :: Node -> Maybe T.Text
+getContent (NodeElement _) = Nothing
+getContent (NodeContent t) = Just t
+
 -- The main outcomes of interest
 data OutcomesRow = OutcomesRow {
   outcomesName :: T.Text
@@ -172,7 +176,16 @@ data ScrapeData = ScrapeData {
 }
 
 allContent :: Node -> [T.Text]
-allContent node = concat [node ^.. elements . contents] ++ catMaybes [node ^? element . contents]
+allContent node = catMaybes [getContent node] ++ catMaybes (sequenceA (fmap elContent (node ^? element)))
+
+elContent :: Element -> [T.Text]
+elContent el = childCont ++ concat (fmap elContent childEls)
+  where childEls = catMaybes $ fmap getElement children
+        childCont = catMaybes $ fmap getContent children
+        children = eltChildren el
+
+gg :: Node -> [Element]
+gg node = node ^.. elements
 
 type Episode = T.Text 
 type Episodes = [Episode]
