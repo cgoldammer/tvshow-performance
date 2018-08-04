@@ -1,4 +1,4 @@
-name:                scrapeCooking
+name:                tvData
 version:             0.1.0.0
 license:             MIT
 license-file:        LICENSE
@@ -13,7 +13,7 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Common, HellsKitchen, TopChef, Lib, Scrapers
+  exposed-modules:     Common, ShowScrapers, Lib, Scrapers
   build-depends:       base >= 4.7 && < 5
                      , transformers
                      , monadplus
@@ -34,6 +34,7 @@ library
                      , curl
                      , turtle
                      , MissingH
+                     , directory
   default-language:    Haskell2010
 
 test-suite scrape-test
@@ -41,7 +42,7 @@ test-suite scrape-test
   hs-source-dirs:      test
   main-is:             Spec.hs
   build-depends:       base
-                     , scrapeCooking
+                     , tvData
                      , blaze-markup
                      , blaze-html
                      , text
