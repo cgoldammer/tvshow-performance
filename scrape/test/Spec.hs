@@ -36,6 +36,9 @@ allTests = TestList [
 getCells :: T.Text -> [[Element]]
 getCells = (fmap . fmap) (M.catMaybes . fmap getElement) $ toListOf $ to TL.fromStrict . html . allNamed (only "tr") . children
 
+getNodes :: T.Text -> [[Node]]
+getNodes = toListOf $ to TL.fromStrict . html . allNamed (only "tr") . children
+
 expandFunction :: (Element -> [Element]) -> [[Element]] -> [[Element]]
 expandFunction f cells = fmap concat $ (fmap . fmap) f cells
 

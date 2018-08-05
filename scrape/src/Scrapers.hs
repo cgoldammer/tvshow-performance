@@ -16,37 +16,31 @@ import Debug.Trace
 import Network.Curl (curlGetString)
 import Data.Validation (Validation(Failure, Success), _Failure, _Success)
 import Data.CSV (genCsvFile)
+import System.Directory (createDirectoryIfMissing)
 
 import System.IO.Unsafe (unsafePerformIO)
 
 import Common (AllTableParser(..), Table(..), ScrapeData(..), DownloadData(..), Validated, HtmlTable, FullData(..), Episode, OutcomesRow(..), getTable, FullExportData(..), allTables, parseTable)
-import HellsKitchen (scrapeDataHK, scrapeDataFNS, scrapeDataRP)
-import TopChef (scrapeDataTC)
+import ShowScrapers (scrapeDataHK, scrapeDataFNS, scrapeDataRP, scrapeDataTC, scrapeDataMC)
 
+-- Summary
 
 getFile :: String -> IO TL.Text
 getFile name = fmap decodeUtf8 $ BSL.readFile $ name
 
 getData :: String -> Int -> IO TL.Text
-getData name num = getFile $ "../data/downloaded/" ++ name ++ "_" ++ show num ++ ".html"
+getData name num = getFile $ "../downloaded/" ++ name ++ "_" ++ show num ++ ".html"
 
-season = 4
-textHK = unsafePerformIO $ getData "HellsKitchen" season
-textTC = unsafePerformIO $ getData "TopChef" season
--- getter = fromJust $ (seasonGetter $ parseSeason scrapeDataHK) season
--- table = fromJust $ getter text
--- tableTC = allTables textTC
--- parsedTC = fmap (parseTable ((seasonParser scrapeDataTC) season)) tableTC
-tableHK = allTables textHK
-parsedHK = fmap (parseTable ((seasonParser scrapeDataHK) season)) tableHK
+season = 1
+text = unsafePerformIO $ getData "MasterChef" season
+table = allTables text
+parsed = fmap (parseTable ((seasonParser scrapeDataMC) season)) table
 
-scrapeData = [scrapeDataHK, scrapeDataTC, scrapeDataFNS, scrapeDataRP]
+scrapeData = [scrapeDataHK, scrapeDataTC, scrapeDataFNS, scrapeDataRP, scrapeDataMC]
 
 summ (PersonTable (Success _)) = "Persontable"
 summ (OutcomeTable (Success _)) = "Outcometable"
 summ x = show x
-
-
 
 tableName :: Table a -> String
 tableName (PersonTable _) = "participants"
@@ -56,7 +50,15 @@ toExportData :: Table Validated -> (String, Validated)
 toExportData (PersonTable val) = ("participants", val)
 toExportData (OutcomeTable val) = ("outcomes", val)
 
-parseOne :: String -> (Int -> AllTableParser) -> Int -> IO ()
+summShort (PersonTable (Success _)) = "P"
+summShort (OutcomeTable (Success _)) = "O"
+summShort x = ""
+
+summResults :: [Table Validated] -> String
+summResults vals = if length short == 0 then "-" else concat short
+  where short = fmap summShort vals
+
+parseOne :: String -> (Int -> AllTableParser) -> Int -> IO String
 parseOne cleanName sParser season = do
   text <- getData cleanName season
   let validated = parseOne' cleanName sParser season text
@@ -64,6 +66,8 @@ parseOne cleanName sParser season = do
   let exporter = uncurry $ exportCSV cleanName season
   let exportData = fmap toExportData validated
   mapM_ exporter exportData
+  return $ summResults validated
+
 
 parseOne' :: String -> (Int -> AllTableParser) -> Int -> TL.Text -> [Table Validated]
 parseOne' cleanName sParser season text = fmap (parseTable (sParser season)) tables
@@ -86,15 +90,6 @@ toCSVData episodes outcomes = T.pack $ genCsvFile $ (fmap . fmap) T.unpack $ rec
         rectangular = withName : expandedOutcomes
         
 
--- toCSVData :: [Episode] -> [OutcomesRow] -> T.Text
--- toCSVData episodes outcomes = T.intercalate newLine $ fmap commaFold (withName : expandedOutcomes)
---   where comma = T.pack "|"
---         withName = (T.pack "participant") : episodes
---         commaFold = T.intercalate comma
---         expandOutcome (OutcomesRow outcomesName outcomesVals) = outcomesName : (padValues (length episodes) "" outcomesVals)
---         expandedOutcomes = (fmap expandOutcome outcomes) :: [[T.Text]]
---         newLine = T.pack "\n"
-
 export fileName (Just c) = writeFile fileName $ T.unpack c
 export fileName Nothing = return ()
 
@@ -109,16 +104,29 @@ exportCSV showName season stub validated = do
   return ()
 
 -- Parse all episodes and export them
-parseAll :: ScrapeData -> IO ()
+parseAll :: ScrapeData -> IO [String]
 parseAll (ScrapeData (DownloadData url cleanName) seasonParser seasons) = do
-  mapM_ (\season -> parseOne cleanName seasonParser season) seasons
+  createDirectoryIfMissing True $ "../data/" ++ cleanName
+  results <- mapM (\season -> parseOne cleanName seasonParser season) seasons
+  let fullRow = cleanName : results
+  return fullRow
 
 -- Download the html to /data
 downloadAll :: ScrapeData -> IO ()
 downloadAll (ScrapeData (DownloadData url cleanName) _ seasons) = mapM_ (downloadOne url cleanName) seasons
 
-doAll :: ScrapeData -> IO ()
+doAll :: ScrapeData -> IO [String]
 doAll dat = downloadAll dat >> parseAll dat
+
+runAll :: IO ()
+runAll = do
+  results <- mapM doAll scrapeData
+  let maxLength = maximum $ fmap length results
+  let firstRow = "show" : fmap show [1..(maxLength - 1)]
+  let padded = fmap (padValues maxLength "") results
+  let csv = genCsvFile $ firstRow : padded
+  writeFile "../data/summary.csv" csv
+  return ()
 
 getUrl :: String -> Int -> String
 getUrl name num = "https://en.wikipedia.org/" ++ name ++ show num ++ ")"
@@ -126,7 +134,7 @@ getUrl name num = "https://en.wikipedia.org/" ++ name ++ show num ++ ")"
 downloadOne :: String -> String -> Int -> IO ()
 downloadOne name cleanedName num = do
   (_, html) <- curlGetString (getUrl name num) []
-  writeFile ("../data/downloaded/" ++ cleanedName ++ "_" ++ show num ++ ".html") html
+  writeFile ("../downloaded/" ++ cleanedName ++ "_" ++ show num ++ ".html") html
   return ()
 
 

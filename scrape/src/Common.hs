@@ -14,7 +14,7 @@ import Data.Tuple (swap)
 import Control.Lens ((#), Prism, Prism', prism, folded, to, only,(^.), (^?),ix, toListOf, (^..))
 import Text.Taggy (Node(..), Element(..), eltChildren)
 import Text.Taggy.Lens (allAttributed, html, element, elements, children, contents, content, allNamed, named, name)
-import Data.List (transpose)
+import Data.List (transpose, groupBy)
 import Debug.Trace (traceShow)
 
 
@@ -111,7 +111,7 @@ outcomeVals :: [T.Text]
 outcomeVals = ["OUT", "ELIM"]
 
 personVals :: [T.Text]
-personVals = ["Hometown"]
+personVals = ["Hometown", "Current Residence", "Original Placement"]
 
 containsValue :: [T.Text] -> [T.Text] -> Bool
 containsValue content expected = any (\v -> elem v content) expected
@@ -141,15 +141,20 @@ data AllTableParser = AllTableParser {
 
 data Table a = PersonTable a | OutcomeTable a deriving (Eq, Show)
 
+
+justType :: Table a -> Table ()
+justType (PersonTable _) = PersonTable ()
+justType (OutcomeTable _) = OutcomeTable ()
+
 allNodes :: HtmlTable -> [[Node]]
 allNodes table = fmap eltChildren $ catMaybes $ fmap getElement table
 
-allTables :: TL.Text -> [Table HtmlTable]
-allTables text = catMaybes $ fmap (tableType . eltChildren) $ catMaybes $ fmap getElement $ catMaybes $ fmap ((safeIndex 0) . eltChildren) $ getTables text
--- catMaybes $ fmap (tableType . eltChildren . catMaybes . (safeIndex 0 ) . eltChildren) $ getTables text
+pickEarliest :: [Table HtmlTable] -> [Table HtmlTable]
+pickEarliest tables = catMaybes $ fmap (safeIndex 0) $ groupBy (\t1 t2 -> justType t1 == justType t2) tables
 
--- x :: _
--- x text = fmap eltChildren $ catMaybes $ fmap getElement $ catMaybes $ fmap ((safeIndex 0) . eltChildren) $ getTables text
+allTables :: TL.Text -> [Table HtmlTable]
+allTables text = pickEarliest $ catMaybes $ fmap (tableType . eltChildren) $ catMaybes $ fmap getElement $ catMaybes $ fmap ((safeIndex 0) . eltChildren) $ getTables text
+
 
 parseTable :: AllTableParser -> Table HtmlTable -> Table Validated
 parseTable (AllTableParser defaultParser _) (PersonTable t) = PersonTable $ defaultParser t
@@ -258,10 +263,18 @@ expandRowSpans spans = fmap expandRowSpan cells
 
 expandRow :: [[Element]] -> [[Element]]
 expandRow [] = []
-expandRow (firstRow:rest) = [spans ++ rests | (spans, rests) <- zipped]
-  where zipped = zip expandedRowSpans (firstRest : rest)
+expandRow (firstRow:rest) = fullTable
+  where zipped = zip expandedRowSpans (firstRest : restBeforeMerge)
+        (restBeforeMerge, restAfterMerge) = splitAt ((length expandedRowSpans) - 1) rest
         (rowSpans, firstRest) = splitByRowSpan firstRow
         expandedRowSpans = transpose $ expandRowSpans rowSpans
+        merged = [spans ++ rests | (spans, rests) <- zipped]
+        fullTable = merged ++ restAfterMerge
+
+-- Like expandRow, but for nodes
+expandNodes :: [[Node]] -> [[Node]]
+expandNodes nodes = (fmap . fmap) NodeElement $ expandRow asElements
+  where asElements = (fmap catMaybes . (fmap . fmap) getElement) nodes
 
 selectRows :: Int -> Int -> [[a]] -> [[a]]
 selectRows rowHeader rowContent vals = catMaybes $ headerRow : contentRows
