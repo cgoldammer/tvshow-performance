@@ -11,11 +11,11 @@ import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
 import Data.Map (Map, fromList)
 import Data.Tuple (swap)
-import Control.Lens ((#), Prism, Prism', prism, folded, to, only,(^.), (^?),ix, toListOf, (^..))
+import Control.Lens ((#), Prism, Prism', prism, folded, to, only,(^.), (^?),ix, toListOf, (^..), _2, _3)
 import Text.Taggy (Node(..), Element(..), eltChildren)
 import Text.Taggy.Lens (allAttributed, html, element, elements, children, contents, content, allNamed, named, name)
-import Data.List (transpose, groupBy)
-import Debug.Trace (traceShow)
+import Data.List (transpose, groupBy, partition)
+import Debug.Trace (traceShow, trace)
 
 
 -- Expands any table cell with cellspan=x into x nodes, each with the same 
@@ -245,35 +245,63 @@ check outcomes@(header:rest) = pure (FullData episodes rest) <*
 
 type RowSpans = [(Element, Int)]
 type TableRow = [Element]
-withRowSpan :: Element -> (Element, Maybe Int)
-withRowSpan el = (el, getRowSpan el)
 
-simplifySpan :: (Element, Maybe Int) -> (Element, Int)
-simplifySpan (el, Nothing) = (el, 1)
-simplifySpan (el, Just n) = (el, n)
+withRowSpan' :: (Int, Element) -> (Int, Element, Maybe Int)
+withRowSpan' (pos, el) = (pos, el, getRowSpan el)
 
-splitByRowSpan :: TableRow -> (RowSpans, TableRow)
-splitByRowSpan row = (fmap simplifySpan withSpan, fmap fst withoutSpan)
-  where rowWithSpans = fmap withRowSpan row
-        (withSpan, withoutSpan) = span (isJust . snd) rowWithSpans
+simplifySpan = undefined
 
+simplifySpan' :: (Int, Element, Maybe Int) -> (Int, Element, Int)
+simplifySpan' (p, el, Nothing) = (p, el, 1)
+simplifySpan' (p, el, Just n) = (p, el, n)
+
+splitBySpan :: TableRow -> (Spans, TableRow)
+splitBySpan row = trace ("without" ++ show withoutSpan) $ (fmap simplifySpan' withSpan, fmap (^. _2) withoutSpan)
+  where rowWithSpans = fmap withRowSpan' $ zip [0..] row
+        (withSpan, withoutSpan) = partition (isJust . (^. _3)) rowWithSpans
+
+expandRow'' = expandRow' []
+
+expandRow' :: Spans -> [[Element]] -> [[Element]]
+expandRow' _ [] = []
+expandRow' spans (first:rest) = trace ("\nspans" ++ show spans) els : expandRow' newSpans rest
+  where (els, newSpans) = expandRowWithSpan first spans
+
+type Spans = [(Int, Element, Int)]
+
+expandRowWithSpan :: [Element] -> Spans -> ([Element], Spans)
+expandRowWithSpan els prevSpans = trace ("row" ++ show nonSpans) $(blendInSpans nonSpans spans, reduceSpans spans)
+  where (newSpans, nonSpans) = splitBySpan els
+        spans = prevSpans ++ newSpans
+        
+blendInSpans :: [Element] -> Spans -> [Element]
+blendInSpans els [] = els
+blendInSpans els ((pos, el, _):rest) = trace (show "after" ++ show els) blendInSpans blended rest
+  where (before, after) = splitAt pos els
+        blended = before ++ [el] ++ after
+
+reduceSpans :: Spans -> Spans
+reduceSpans spans = filter aboveZero reduced
+  where aboveZero s = (s ^. _3) > 0
+        reduced = fmap (\(p, el, n) -> (p, el, n - 1)) spans
+  
 expandRowSpans :: RowSpans -> [[Element]]
 expandRowSpans spans = fmap expandRowSpan cells
   where cells = fmap fst spans
 
-expandRow :: [[Element]] -> [[Element]]
-expandRow [] = []
-expandRow (firstRow:rest) = fullTable
-  where zipped = zip expandedRowSpans (firstRest : restBeforeMerge)
-        (restBeforeMerge, restAfterMerge) = splitAt ((length expandedRowSpans) - 1) rest
-        (rowSpans, firstRest) = splitByRowSpan firstRow
-        expandedRowSpans = transpose $ expandRowSpans rowSpans
-        merged = [spans ++ rests | (spans, rests) <- zipped]
-        fullTable = merged ++ restAfterMerge
+-- expandRow :: [[Element]] -> [[Element]]
+-- expandRow [] = []
+-- expandRow (firstRow:rest) = fullTable
+--   where zipped = zip expandedRowSpans (firstRest : restBeforeMerge)
+--         (restBeforeMerge, restAfterMerge) = splitAt ((length expandedRowSpans) - 1) rest
+--         (rowSpans, firstRest) = splitByRowSpan firstRow
+--         expandedRowSpans = transpose $ expandRowSpans rowSpans
+--         merged = [spans ++ rests | (spans, rests) <- zipped]
+--         fullTable = merged ++ restAfterMerge
 
 -- Like expandRow, but for nodes
 expandNodes :: [[Node]] -> [[Node]]
-expandNodes nodes = (fmap . fmap) NodeElement $ expandRow asElements
+expandNodes nodes = (fmap . fmap) NodeElement $ expandRow'' asElements
   where asElements = (fmap catMaybes . (fmap . fmap) getElement) nodes
 
 selectRows :: Int -> Int -> [[a]] -> [[a]]

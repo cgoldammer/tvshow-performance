@@ -54,7 +54,6 @@ tableExpandTest markup number = TestCase $ assertEqual error number lengths
          expanded = expandFunction expandColSpan cells
          lengths = fmap length expanded
 
-
 tableExpandTests = fmap (uncurry tableExpandTest) tableExpandShape
 
 toText :: B.Markup -> T.Text
@@ -90,12 +89,25 @@ rowSpan0 = B.table $ do
   B.tr $ do
     B.td B.! B.customAttribute "rowspan" "2" $ "doubleRow0"
 
-rowExpandShape = [(rowSpan, [2, 2])]
+-- next encountered row.
+rowSpan1 :: B.Markup
+rowSpan1 = B.table $ do
+  B.tr $ do
+    B.td $ "col1"
+    B.td B.! B.customAttribute "rowspan" "2" $ "col2 double"
+    B.td $ "col3"
+  B.tr $ do
+    B.td $ "col1"
+    B.td $ "col3"
+
+cells = getCells $ toText rowSpan1
+
+rowExpandShape = [(rowSpan, [2, 2]), (rowSpan1, [3,3])]
 rowExpandTest :: B.Markup -> [Int] -> Test
 rowExpandTest markup number = TestCase $ assertEqual (show expanded) number lengths
   where  error = show expanded 
          cells = getCells $ toText markup
-         expanded = expandRow cells
+         expanded = expandRow'' cells
          lengths = fmap length expanded
 
 rowExpandTests = fmap (uncurry rowExpandTest) rowExpandShape

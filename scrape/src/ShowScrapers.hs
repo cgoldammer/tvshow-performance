@@ -11,11 +11,11 @@ import Control.Monad (join)
 import Data.Map (Map, fromList, assocs, toAscList, findWithDefault, lookup)
 import Debug.Trace (traceShow)
 
-import Common (TableParser, TableGetter, AllTableParser(..), Validated, check, makeOutcome, rowParse, getNodeSpan, safeIndex, getElement, getTable, DownloadData(..), ScrapeData(..), equalizeLengths, constMap, selectRows, expandNodes)
+import Common (TableParser, TableGetter, AllTableParser(..), Validated, check, makeOutcome, rowParse, getNodeSpan, safeIndex, getElement, getTable, DownloadData(..), ScrapeData(..), equalizeLengths, constMap, selectRows, expandNodes, expandRow'')
 
 defaultParse :: TableParser
 defaultParse tableRows = check content
-  where nodes = fmap eltChildren $ catMaybes $ fmap getElement tableRows :: [[Node]]
+  where nodes = expandNodes $ fmap eltChildren $ catMaybes $ fmap getElement tableRows :: [[Node]]
         content = equalizeLengths $ catMaybes $ fmap (makeOutcome . rowParse 0) nodes
 
 parseTable :: TableParser
