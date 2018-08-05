@@ -100,7 +100,22 @@ rowSpan1 = B.table $ do
     B.td $ "col1"
     B.td $ "col3"
 
+
 cells = getCells $ toText rowSpan1
+
+link :: B.Markup
+link = B.div $ do
+  B.a $ "text1"
+  "text2"
+  B.a $ "text3"
+
+    
+cc = toListOf $ to TL.fromStrict . html . allNamed (only "div") 
+
+ccc = NodeElement $ head $ cc $ toText link
+  
+
+    
 
 rowExpandShape = [(rowSpan, [2, 2]), (rowSpan1, [3,3])]
 rowExpandTest :: B.Markup -> [Int] -> Test

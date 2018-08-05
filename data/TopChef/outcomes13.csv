@@ -1,6 +1,6 @@
 "participant","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"
-"Jeremy","WIN","IN","HIGH","WIN","IN","IN","IN","HIGH","LOW","LOW","LOW","LOW","WIN","IN","WINNER"
-"Amar","HIGH","HIGH","IN","IN","IN","HIGH","IN","HIGH","LOW","LOW","WIN","IN","OUT","WIN","RUNNER-UP"
+"Jeremy","WIN","IN","HIGH","WIN","IN","IN","IN","HIGH","LOW","LOW","LOW","LOW","WIN","IN4","WINNER"
+"Amar","HIGH","HIGH","IN","IN","IN","HIGH","IN","HIGH","LOW","LOW","WIN","IN","OUT3","WIN5","RUNNER-UP"
 "Isaac","IN","HIGH","IN","IN","IN","LOW","IN","LOW","WIN","WIN","IN","IN","LOW","OUT",
 "Marjorie","IN","WIN","IN","IN","IN","IN","WIN","LOW","HIGH","HIGH","LOW","HIGH","LOW","OUT",
 "Carl","HIGH","IN","IN","IN","IN","IN","HIGH","IN","HIGH","HIGH","HIGH","WIN","OUT",,
@@ -10,7 +10,7 @@
 "Chad","IN","IN","IN","IN","IN","IN","HIGH","OUT",,,,,,,
 "Jason","IN","IN","IN","IN","IN","LOW","OUT",,,,,,,,
 "Wesley","IN","IN","LOW","IN","HIGH","OUT",,,,,,,,,
-"Angelina","LOW","HIGH","LOW","LOW","IN","OUT",,,,,,,,,
+"Angelina","LOW","HIGH","LOW","LOW","IN","OUT2",,,,,,,,,
 "Giselle","IN","IN","IN","IN","OUT",,,,,,,,,,
 "Grayson","LOW","LOW","IN","OUT",,,,,,,,,,,
 "Frances","IN","LOW","OUT",,,,,,,,,,,,

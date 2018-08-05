@@ -64,12 +64,11 @@ data OutcomesRow = OutcomesRow {
 simplifyNode :: Node -> Node
 simplifyNode (NodeContent t) = NodeContent t
 simplifyNode node@(NodeElement (Element name attrs children)) = NodeElement $ Element name attrs simpleChildren
-  where contents = allContent node
-        firstContent = catMaybes [listToMaybe contents] -- [Text]
-        simpleChildren = fmap NodeContent firstContent
+  where contents = allContent node :: [T.Text]
+        simpleChildren = fmap NodeContent contents
 
 firstContent :: Node -> Maybe T.Text
-firstContent = listToMaybe . allContent
+firstContent n = Just $ T.intercalate (T.pack "") $ allContent n
 
 firstContentDefault :: Node -> T.Text
 firstContentDefault node = maybe "" id $ firstContent node
@@ -181,13 +180,11 @@ data ScrapeData = ScrapeData {
 }
 
 allContent :: Node -> [T.Text]
-allContent node = catMaybes [getContent node] ++ catMaybes (sequenceA (fmap elContent (node ^? element)))
+allContent (NodeElement el) = concat $ fmap allContent $ eltChildren el
+allContent (NodeContent t) = [t]
 
-elContent :: Element -> [T.Text]
-elContent el = childCont ++ concat (fmap elContent childEls)
-  where childEls = catMaybes $ fmap getElement children
-        childCont = catMaybes $ fmap getContent children
-        children = eltChildren el
+-- elContent :: Element -> [T.Text]
+-- elContent el = concat $ fmap displayNode $ eltChildren el
 
 gg :: Node -> [Element]
 gg node = node ^.. elements

@@ -32,9 +32,9 @@ getData :: String -> Int -> IO TL.Text
 getData name num = getFile $ "../downloaded/" ++ name ++ "_" ++ show num ++ ".html"
 
 season = 1
-text = unsafePerformIO $ getData "MasterChef" season
+text = unsafePerformIO $ getData "TopChef" season
 table = allTables text
-parsed = fmap (parseTable ((seasonParser scrapeDataMC) season)) table
+parsed = fmap (parseTable ((seasonParser scrapeDataTC) season)) table
 
 scrapeData = [scrapeDataHK, scrapeDataTC, scrapeDataFNS, scrapeDataRP, scrapeDataMC]
 

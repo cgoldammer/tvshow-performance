@@ -53,7 +53,7 @@ parseTableTC tableRows = check $ equalizeLengths $ catMaybes $ fmap (makeOutcome
         nodes = fmap eltChildren $ catMaybes $ fmap getElement tableRows :: [[Node]]
 
 seasonsTC = [1..15]
-parseTC = const (AllTableParser parseTableTC parseTableTC)
+parseTC = const (AllTableParser defaultParse parseTableTC)
 downloadTC = DownloadData "wiki/Top_Chef_(season_" "TopChef"
 scrapeDataTC = ScrapeData downloadTC parseTC seasonsTC
 
